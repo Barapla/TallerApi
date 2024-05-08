@@ -48,9 +48,13 @@ Creamos el tsconfig.json
 }
 ```
 
+(Windows) Instalamos TSlint
+- npm install -g typescript
+
 Creamos nuestro tslint.json
 
 - ./node_modules/.bin/tslint --init
+- (Windows) npx tslint --init
 
 Actualizamos el package.json
 ```json
