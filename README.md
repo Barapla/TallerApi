@@ -144,6 +144,46 @@ Leer esta documentacion
 
 https://www.linkedin.com/pulse/clean-architecture-en-node-y-express-odannys-de-la-cruz/?originalSubdomain=es
 
+# Estructura del Proyecto
+
+Para la estructura que llevaremos a cabo es la siguiente:
+```
+src/
+├── controllers/
+├── core/
+│ ├── config/
+│ ├── dto/
+│ ├── mappers/
+│ ├── middlewares/
+│ └── utils/
+├── routes/
+├── services/
+└── index.ts
+```
+
+## Descripción de Directorios
+
+- **controllers**: Contiene los controladores que manejan las solicitudes entrantes y devuelven respuestas al cliente.
+
+- **core**: Directorio principal para archivos que forman la base del proyecto.
+  - **config**: Contiene archivos de configuración para diferentes entornos y aspectos del proyecto.
+  - **dto** (Data Transfer Objects): Define cómo los datos serán enviados sobre la red.
+  - **mappers**: Utilizados para mapear de una forma de datos a otra, por ejemplo de entidades de base de datos a DTOs.
+  - **middlewares**: Middleware de Express que se utiliza para manejar solicitudes, realizar acciones antes de que lleguen a los controladores, o manejar errores.
+  - **utils**: Funciones de utilidad generales usadas en todo el proyecto.
+
+- **routes**: Define las rutas del servidor que mapean las solicitudes a los controladores correspondientes.
+
+- **services**: Contiene la lógica de negocio y la lógica para interactuar con la base de datos.
+
+- **index.ts**: Punto de entrada del proyecto donde se configura y se lanza el servidor.
+
+## Notas Adicionales
+
+Asegúrese de documentar cada parte de su código a medida que su proyecto se expande. Mantener un código bien documentado es esencial para la escalabilidad y el mantenimiento a largo plazo.
+
+
+
 # Recomendacion utilizar prisma
 
 Documentacion
