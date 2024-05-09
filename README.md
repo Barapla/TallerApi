@@ -527,8 +527,6 @@ paths:
         - developers
       summary: Get all developers
       operationId: getDevelopers
-      security:
-        - bearerAuth: []  # El nombre debe coincidir con el definido en components/securitySchemes
       responses:
         '200':
           description: OK
@@ -537,34 +535,30 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Game'
+                  $ref: '#/components/schemas/Developer'
     post:
       tags:
         - developers
-      summary: Create a game
-      operationId: createGame
-      security:
-        - bearerAuth: []  # El nombre debe coincidir con el definido en components/securitySchemes
+      summary: Create a developer
+      operationId: createDeveloper
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GameCreateDto'
+              $ref: '#/components/schemas/DeveloperCreateDto'
       responses:
         '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Game'
+                $ref: '#/components/schemas/Developer'
   /developers/{uuid}:
     get:
       tags:
         - developers
-      summary: Get game by uuid
-      operationId: getGame
-      security:
-        - bearerAuth: []  # El nombre debe coincidir con el definido en components/securitySchemes
+      summary: Get developer by uuid
+      operationId: getDeveloper
       parameters:
         - name: uuid
           in: path
@@ -578,14 +572,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Game'
+                $ref: '#/components/schemas/Developer'
     put:
       tags:
         - developers
-      summary: Update game by uuid
-      operationId: updateGame
-      security:
-        - bearerAuth: []  # El nombre debe coincidir con el definido en components/securitySchemes
+      summary: Update developer by uuid
+      operationId: updateDeveloper
       parameters:
         - name: uuid
           in: path
@@ -597,21 +589,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GameUpdateDto'
+              $ref: '#/components/schemas/DeveloperUpdateDto'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Game'
+                $ref: '#/components/schemas/Developer'
     delete:
       tags:
         - developers
       summary: Delete game by uuid
       operationId: deleteGame
-      security:
-        - bearerAuth: []  # El nombre debe coincidir con el definido en components/securitySchemes
       parameters:
         - name: uuid
           in: path
