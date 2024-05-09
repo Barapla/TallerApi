@@ -124,7 +124,7 @@ Escribir dentro de
     "watch": ["src"], // esta es nuestra carpeta que contiene todos nuestros archivos
     "ext": ".ts,.js", // este son las extensiones que estara munitoreando
     "ignore": [], // si existe algo que ignore lo agregamos aqui
-    "exec": "npx ts-node ./src/app.ts" 
+    "exec": "npx ts-node ./src/index.ts" 
 }
 ```
 
