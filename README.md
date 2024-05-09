@@ -764,3 +764,35 @@ app.listen(port, () => {
    console.log(`Servidor en el pueto: ${port}`);
 });
 ```
+
+# Auth
+
+Para el siguiente paso vamos a necesitar una tabla de Usuarios para crear un modulo de registro, inicio de sesion y authorizacion
+
+## Configuracion variables de entorno
+
+Primero en la carpeta core/utils creamos un archivo llamado config.ts
+
+```
+export const getConfig = (key: string) => {
+  const value = process.env[key];
+
+  if (value === undefined) {
+    throw new Error(`Missing environment variable: ${key}`);
+  }
+  return value;
+};
+```
+
+## APP_SECRET
+
+En la carpeta core/config creamos nuestro archivo config.ts
+
+```
+import dotenv from 'dotenv';
+import { getConfig } from '../utils/config';
+dotenv.config();
+
+export const secretKey = getConfig('APP_SECRET');
+```
+
