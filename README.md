@@ -202,6 +202,10 @@ Esto nos generara un carpeta "prisma" que contendra "schema.prisma" y un archivo
 
 - npm install dotenv
 
+```
+DATABASE_URL="postgresql://owner_TallerApi:w7BW0nDeSDKY6DEs0yKs@tallerapi.cfmwk2wmmm6f.us-east-1.rds.amazonaws.com/TallerApi?schema=public"
+```
+
 En el archivo ".env" estara dentro nuestra variable de "DATABASE_URL"
 Esta contendra la cadena de conexion hacia nuestra base de datos, necesitamos poner la nuestra
 
