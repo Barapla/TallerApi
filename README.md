@@ -494,10 +494,283 @@ app.listen(port, () => {
 });
 ```
 
+# Swagger
+
+## Instalamos las dependencias necesarias
+
+- npm install swagger-jsdoc
+
+- npm install swagger-ui-express
+
+- npm install yamljs
+
+- npm i --save-dev @types/yamljs
+
+- npm i --save-dev @types/swagger-ui-express
+
+## Swagger.yaml
+
+Creamos un archivo Swagger.yaml en la raiz y seguimos la siguiente estructura 
+
+```
+openapi: 3.0.0
+info:
+  title: API de Ejemplo
+  version: 1.0.0
+  description: Una API de ejemplo para demostrar Swagger en Node.js
+servers:
+  - url: 'http://localhost:3000/'
+paths:
+  /developers:
+    get:
+      tags:
+        - developers
+      summary: Get all developers
+      operationId: getDevelopers
+      security:
+        - bearerAuth: []  # El nombre debe coincidir con el definido en components/securitySchemes
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Game'
+    post:
+      tags:
+        - developers
+      summary: Create a game
+      operationId: createGame
+      security:
+        - bearerAuth: []  # El nombre debe coincidir con el definido en components/securitySchemes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameCreateDto'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+  /developers/{uuid}:
+    get:
+      tags:
+        - developers
+      summary: Get game by uuid
+      operationId: getGame
+      security:
+        - bearerAuth: []  # El nombre debe coincidir con el definido en components/securitySchemes
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+    put:
+      tags:
+        - developers
+      summary: Update game by uuid
+      operationId: updateGame
+      security:
+        - bearerAuth: []  # El nombre debe coincidir con el definido en components/securitySchemes
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameUpdateDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+    delete:
+      tags:
+        - developers
+      summary: Delete game by uuid
+      operationId: deleteGame
+      security:
+        - bearerAuth: []  # El nombre debe coincidir con el definido en components/securitySchemes
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+components:
+  schemas:
+    Developer:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+    DeveloperCreateDto:
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    DeveloperUpdateDto:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+```
+
+### Explicacion estructura
+
+#### 1.- Versión de OpenAPI:
+
+```
+openapi: 3.0.0
+```
+
+Esto especifica la versión de la especificación OpenAPI que se está utilizando para este documento. OpenAPI 3.0.0 introduce muchas mejoras sobre versiones anteriores como Swagger 2.0.
+
+#### 2.- Información General:
+
+```
+info:
+  title: API de Ejemplo
+  version: 1.0.0
+  description: Una API de ejemplo para demostrar Swagger en Node.js
+```
+
+- **title**: El nombre de la API.
+- **version**: La versión de la API.
+- **description**: Una breve descripción de lo que hace la API.
+
+#### 3.- Servidores:
+
+```
+servers:
+  - url: 'http://localhost:3000/'
+```
+
+Esto define una lista de servidores donde la API está disponible. En este caso, la API se encuentra disponible en http://localhost:3000/.
+
+
+#### 4.- Rutas:
+
+Dentro de paths, defines las rutas individuales (endpoints) que la API expone y los métodos HTTP disponibles para esas rutas.
+
+```
+/developers:
+  get:
+    ...
+  post:
+    ...
+/developers/{uuid}:
+  get:
+    ...
+  put:
+    ...
+  delete:
+    ...
+```
+
+- Cada operación (`get`, `post`, `put`, `delete`) dentro de una ruta puede tener varias propiedades:
+  - **tags**: Ayuda a agrupar operaciones por recursos o cualquier otro cualificador.
+  - **summary**: Un breve resumen de lo que hace la operación.
+  - **operationId**: Un identificador único para la operación.
+  - **security**: Define los esquemas de seguridad que se aplican a la operación.
+  - **parameters**: Parámetros necesarios para la operación. En el caso de los endpoints que usan `{uuid}`, esto indica un parámetro en la ruta.
+  - **requestBody**: Define el cuerpo de la solicitud para métodos que envían datos (como `post` y `put`).
+  - **responses**: Define las respuestas que pueden ser devueltas por la operación.
 
 
 
+#### 5.- Componentes:
+
+```
+components:
+  schemas:
+    Developer:
+      ...
+    DeveloperCreateDto:
+      ...
+    DeveloperUpdateDto:
+      ...
+```
+
+Aquí defines los schemas que son utilizados en diferentes partes de tu API. Estos esquemas son modelos de datos que describen la estructura de los objetos JSON utilizados en las solicitudes y respuestas.Por ejemplo, Developer puede representar cómo se ve un desarrollador en tu sistema, mientras que DeveloperCreateDto podría ser un objeto utilizado específicamente para crear un nuevo desarrollador.
+
+## Implementacion
+
+En nuestro archivo index.ts agregamos las dependencias y lo configuramos para que lea el swagger
+
+```
+//importar express
+import express from 'express';
+import swaggerUi from "swagger-ui-express";
+import YAML from "yamljs";
+
+import developerRoute from './routes/developer.route';
 
 
+// Crear una nueva instancia de express
+const app = express();
 
+// Definir el puerto
+const port = 3000;
 
+app.use([express.json()])
+
+app.use(
+  "/swagger",
+  swaggerUi.serve,
+  (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const swaggerDocument = YAML.load("./swagger.yaml");
+    const swaggerUiHandler = swaggerUi.setup(swaggerDocument);
+    swaggerUiHandler(req, res, next);
+  }
+);
+
+app.use("/developers", developerRoute);
+
+// Crear una ruta
+app.get('/', (req, res) => {
+  res.send('Hola mundo!');
+});
+
+// Iniciar el servidor
+app.listen(port, () => {
+   console.log(`Servidor en el pueto: ${port}`);
+});
+```
