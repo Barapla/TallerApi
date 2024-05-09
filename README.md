@@ -278,3 +278,226 @@ Generar los modelos del "schema.prisma" desde una base de datos existente:
 Aplicar los cambios en el modelo
 
 - npx prisma generate
+
+# Configuracion DB
+
+- En nuestra carpeta core/config creamos un archivo database.ts
+
+```
+import { PrismaClient } from '@prisma/client';
+export const prismaClient = new PrismaClient();
+```
+
+# Estandarizar respuestas
+
+- En nuestra carpeta core/dto creamos un archivo TResult.ts
+
+```
+export interface TResult<T> {
+    data: T;
+    message: string[];
+    success: boolean;
+}
+```
+
+- En nuestra carpeta core/mappers creamos un archivo tresult.mappers.ts
+
+```
+import { TResult } from "../dto/TResult";
+
+export const createTResult = <T>(data: T, message: string[] = [], ): TResult<T> => {
+    const hasMessage = message.length > 0;
+    const success = !hasMessage;
+
+    return {
+        data,
+        message: hasMessage ? message : ["Success"],
+        success
+    }
+
+}
+```
+
+# Creacion DTO
+
+- En nuestra carpeta core/dto creamos un archivo developer.dto.ts
+
+```
+export interface DeveloperDto {
+    uuid: string;
+    name: string;
+    description: string;
+    founded: Date;
+}
+
+export interface DeveloperCreateDto {
+    name: string;
+    description: string;
+    founded: Date;
+}
+
+export interface DeveloperUpdateDto {
+    uuid: string;
+    name: string;
+    description: string;
+    founded: Date;
+}
+```
+
+- En nuestra carpeta core/mappers creamos un archivo llamado developer.mappers.ts
+
+```
+import { Developer } from "@prisma/client";
+import { DeveloperDto } from "../dto/developer.dto";
+
+export const DeveloperEntityToDto = (developer: Developer): DeveloperDto => {
+    return {
+        uuid: developer.uuid,
+        name: developer.name,
+        description: developer.description || "",
+        founded: developer.founded || new Date() // Add conditional check to handle null value and assign default value
+    };
+}  
+
+export const DevelopersEntityToDto = (developers: Developer[]): DeveloperDto[] => {
+    return developers.map(developer => DeveloperEntityToDto(developer));
+}
+```
+
+# Creacion de Servicio
+
+- En nuestra carpeta de services creamos un archivo llamado developer.service.ts
+
+```
+import { prismaClient } from "../core/config/database";
+import { DeveloperCreateDto, DeveloperUpdateDto } from "../core/dto/developer.dto";
+
+
+export const getAll = async () => {
+    try {
+      const developers = await prismaClient.developer.findMany();
+  
+      return developers;
+    } catch (err) {
+      throw new Error("Error getting developers");
+    }
+}
+
+export const getByUuid = async (uuid: string) => {
+  try {
+    const developer = await prismaClient.developer.findUnique({
+      where: {
+        uuid,
+      },
+    });
+
+    return developer;
+  } catch (err) {
+    throw new Error("Error getting developer");
+  }
+}
+
+export const register = async (developer: DeveloperCreateDto) => {
+  try {
+    const newDeveloper = await prismaClient.developer.create({
+      data: {
+        ...developer,
+      },
+    });
+
+    return newDeveloper;
+  } catch (err) {
+    console.log(err);
+    throw new Error("Error creating developer");
+  }
+};
+
+export const update = async (developer: DeveloperUpdateDto) => {
+  try {
+    const updateDeveloper = await prismaClient.developer.update({
+      where: {
+        uuid: developer.uuid,
+      },
+      data: {
+        ...developer,
+      },
+    });
+    return updateDeveloper;
+  } catch (err) {
+    console.log(err);
+    throw new Error("Error updating developer");
+  }
+}
+
+export const deleteByUuid = async (uuid: string) => {
+  try {
+    await prismaClient.developer.delete({
+      where: {
+        uuid,
+      },
+    });
+  } catch (err) {
+    throw new Error("Error deleting developer");
+  }
+}
+```
+
+# Crear rutas
+
+- En la carpeta routes creamos un archivo llamado developer.route.ts
+
+```
+import express from "express";
+import { createDeveloper, deleteDeveloper, getDeveloper, getDevelopers, updateDeveloper } from "../controllers/developer.controller";
+
+const router = express.Router();
+
+router.get("/", getDevelopers);
+router.get("/:uuid", getDeveloper);
+router.post("/", createDeveloper);
+router.put("/:uuid", updateDeveloper);
+router.delete("/:uuid", deleteDeveloper);
+
+
+export default router;
+```
+
+# Importar rutas
+
+- En nuestro archivo index.ts importamos las rutas
+
+```
+//importar express
+import express from 'express';
+
+import developerRoute from './routes/developer.route';
+
+// Crear una nueva instancia de express
+const app = express();
+
+// Definir el puerto
+const port = 3000;
+
+app.use([express.json()])
+
+
+app.use("/developers", developerRoute);
+
+// Crear una ruta
+app.get('/', (req, res) => {
+  res.send('Hola mundo!');
+});
+
+// Iniciar el servidor
+app.listen(port, () => {
+   console.log(`Servidor en el pueto: ${port}`);
+});
+```
+
+
+
+
+
+
+
+
