@@ -446,6 +446,79 @@ export const deleteByUuid = async (uuid: string) => {
 }
 ```
 
+# Crear Controlador
+
+- En la carpeta controllers creamos un archivo llamado developer.controller.ts
+
+```
+import { Request, Response } from "express";
+import { createTResult } from "../core/mappers/tresult.mappers";
+import { DeveloperEntityToDto, DevelopersEntityToDto } from "../core/mappers/developer.mappers";
+import { deleteByUuid, getAll, getByUuid, register, update } from "../services/developer.service";
+import { DeveloperCreateDto, DeveloperUpdateDto } from "../core/dto/developer.dto";
+
+export const getDevelopers = async (req: Request, res: Response) => {
+    try {
+        const developers = await getAll();
+        res.status(200).json(createTResult(DevelopersEntityToDto(developers)));
+    } catch (err) {
+        res.status(500).json( { message: err } );
+    }
+};
+
+export const getDeveloper = async (req: Request, res: Response) => {
+    try {
+        const developer = await getByUuid(req.params.uuid);
+        const developerDto = developer ? DeveloperEntityToDto(developer) : null; // Add conditional check and provide default value
+        res.status(200).json(createTResult(developerDto));
+    } catch (err) {
+        res.status(500).json({ message: err });
+    }
+};
+
+export const createDeveloper = async (req: Request, res: Response) => {
+    try {
+        const developer = req.body as DeveloperCreateDto;
+      
+        const newDeveloper = await register(developer);
+
+        res.status(201).json(createTResult(DeveloperEntityToDto(newDeveloper)));
+    } catch (err) {
+        res.status(500).json({ message: err });
+    }
+};
+
+export const updateDeveloper = async (req: Request, res: Response) => {
+    try {
+
+        // Extraemos el uuid de los parámetros de la ruta
+        const { uuid } = req.params;
+        
+        // Construimos el objeto GameUpdateDto con el uuid y los demás datos del cuerpo de la solicitud
+        const developer: DeveloperUpdateDto = {
+            uuid: uuid,
+            name: req.body.name,
+            description: req.body.description,
+            founded: req.body.founded
+        };
+
+        const updatedGame = await update(developer);
+        res.status(200).json(createTResult(DeveloperEntityToDto(updatedGame)));
+    } catch (err) {
+        res.status(500).json({ message: err });
+    }
+};
+
+export const deleteDeveloper = async (req: Request, res: Response) => {
+    try {
+        await deleteByUuid(req.params.uuid);
+        res.status(200).json(createTResult("Developer deleted"));
+    } catch (err) {
+        res.status(500).json({ message: err });
+    }
+};
+```
+
 # Crear rutas
 
 - En la carpeta routes creamos un archivo llamado developer.route.ts
